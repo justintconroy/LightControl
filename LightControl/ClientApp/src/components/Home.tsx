@@ -1,7 +1,11 @@
-import React, { Component } from 'react';
+import * as React from "react";
 
-export class Home extends Component {
+export class Home extends React.Component<any,any> {
   static displayName = Home.name;
+
+    constructor(props: any) {
+        super(props);
+    }
 
   render () {
     return (
