@@ -1,6 +1,6 @@
-import * as React from 'react';
+import * as React from "react";
 
-export class Counter extends React.Component<any,any> {
+export class Counter extends React.Component<any, any> {
   static displayName = Counter.name;
 
   constructor(props: any) {
@@ -22,9 +22,13 @@ export class Counter extends React.Component<any,any> {
 
         <p>This is a simple example of a React component.</p>
 
-        <p aria-live="polite">Current count: <strong>{this.state.currentCount}</strong></p>
+        <p aria-live="polite">
+          Current count: <strong>{this.state.currentCount}</strong>
+        </p>
 
-        <button className="btn btn-primary" onClick={this.incrementCounter}>Increment</button>
+        <button className="btn btn-primary" onClick={this.incrementCounter}>
+          Increment
+        </button>
       </div>
     );
   }
