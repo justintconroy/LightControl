@@ -1,9 +1,12 @@
 ﻿import * as React from "react";
 import { LightClient } from "../models/LightClient";
+import { LightDisplay } from "./LightDisplay";
 
 interface ILightManagerProps {}
 interface ILightManagerState {
   clients: LightClient[];
+  current: LightClient | null;
+  currentKey: string | null;
   loading: boolean;
 }
 
@@ -18,6 +21,8 @@ export class LightManager extends React.Component<
 
     this.state = {
       clients: [],
+      current: null,
+      currentKey: null,
       loading: true
     };
   }
@@ -27,7 +32,7 @@ export class LightManager extends React.Component<
 
   renderLightModulesTable(clients: LightClient[]) {
     return (
-      <table className="table table-striped" aria-labelledby="tabelLabel">
+      <table className="table table-striped" aria-labelledby="tableLabel">
         <thead>
           <tr>
             <th>ID</th>
@@ -38,7 +43,7 @@ export class LightManager extends React.Component<
         </thead>
         <tbody>
           {clients.map(client => (
-            <tr key={client.id}>
+            <tr key={client.id} onClick={() => "uno"}>
               <td>{client.id}</td>
               <td>{client.name}</td>
               <td>{client.type}</td>
@@ -61,8 +66,14 @@ export class LightManager extends React.Component<
 
     return (
       <div>
-        <h1 id="tableLabel">Light Modules</h1>
-        {contents}
+        <div>
+          <h1 id="tableLabel">Light Modules</h1>
+          {contents}
+        </div>
+        <div className="selected-light">
+          <h2>Selected Light Module</h2>
+          <LightDisplay client={this.state.current} />
+        </div>
       </div>
     );
   }
