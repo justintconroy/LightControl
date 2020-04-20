@@ -1,7 +1,10 @@
 import * as React from "react";
 import { Color, ColorResult, SketchPicker } from "react-color";
 
-interface ILightProps {}
+export interface ILightProps {
+  color: Color;
+  isSelected: boolean;
+}
 interface ILightState {
   color: Color;
   isSelected: boolean;

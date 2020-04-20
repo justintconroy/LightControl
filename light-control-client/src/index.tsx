@@ -1,6 +1,6 @@
 import * as React from "react";
 import ReactDOM from "react-dom";
-import { Light } from "./components/light";
+import { Strand } from "./components/strand";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       </header>
       <body>
         <div>
-          <Light />
+          <Strand />
         </div>
       </body>
     </div>
