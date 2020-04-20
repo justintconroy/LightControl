@@ -8,6 +8,7 @@ namespace LightControlServer
 {
     public class Startup
     {
+        readonly string DevFrontendAllowCors = "_devFrontendAllowCors";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -19,6 +20,19 @@ namespace LightControlServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddLogging();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: DevFrontendAllowCors,
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:3000")
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -32,9 +46,9 @@ namespace LightControlServer
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors(DevFrontendAllowCors);
 
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

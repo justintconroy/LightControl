@@ -6,15 +6,34 @@ interface IStrandProps {}
 interface IStrandState {
   lights: Color[];
   selected: number | null;
+  isLoaded: boolean;
 }
 
 export class Strand extends React.Component<IStrandProps, IStrandState> {
   constructor(props: IStrandProps) {
     super(props);
     this.state = {
-      lights: Array(50).fill({ Color: "#000000", isSelected: false }),
+      lights: Array(0),
       selected: null,
+      isLoaded: false,
     };
+  }
+
+  componentDidMount() {
+    fetch("https://localhost:5001/api/strand")
+      .then((response) => response.json())
+      .then(
+        (data) => {
+          const lights: string[] = data.lights.map(
+            (light: any) => light.color as string
+          );
+          this.setState({ lights: lights, isLoaded: true });
+        },
+        (_error) =>
+          this.setState({
+            lights: Array(0),
+          })
+      );
   }
 
   handleClick = (i: number) => {
@@ -37,7 +56,7 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
   };
 
   render() {
-    return (
+    return this.state.isLoaded ? (
       <div className="strand">
         {this.state.lights.map((light, i) => {
           return (
@@ -50,6 +69,8 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
           );
         })}
       </div>
+    ) : (
+      <div className="strand">Strand not loaded!</div>
     );
   }
 }

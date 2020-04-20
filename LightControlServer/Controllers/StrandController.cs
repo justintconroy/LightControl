@@ -1,5 +1,6 @@
 ﻿using LightControlServer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace LightControlServer.Controllers
@@ -8,10 +9,17 @@ namespace LightControlServer.Controllers
     [ApiController]
     public class StrandController : ControllerBase
     {
+        private readonly ILogger _logger;
+        public StrandController(ILogger<StrandController> logger)
+        {
+            _logger = logger;
+        }
+
         // GET: api/Strand
         [HttpGet]
         public IActionResult Get()
         {
+            //_logger.LogInformation("A thing to log!!!!!");
             var strand = new Strand
             {
                 Id = 1,
