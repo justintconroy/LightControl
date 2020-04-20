@@ -1,0 +1,27 @@
+h1 {
+  color: red;
+}
+
+.light {
+  float: left;
+  height: 50px;
+  width: 50px;
+}
+
+.light > .light-picker {
+  float: left;
+  margin-top: -100px;
+}
+
+.strand-manager {
+  display: flex;
+  flex-direction: column;
+}
+
+.strand:after {
+  clear: both;
+  content: "";
+  display: table;
+  border: 2px;
+  border-color: "black";
+}

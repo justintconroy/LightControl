@@ -1,5 +1,6 @@
 import * as React from "react";
 import ReactDOM from "react-dom";
+import "./index.css";
 import { Strand } from "./components/strand";
 
 function App() {
@@ -9,7 +10,7 @@ function App() {
         <h1>Light Control!</h1>
       </header>
       <body>
-        <div>
+        <div className="strand-manager">
           <Strand />
         </div>
       </body>
