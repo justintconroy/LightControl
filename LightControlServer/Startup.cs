@@ -1,8 +1,11 @@
+using LightControlServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 
 namespace LightControlServer
 {
@@ -33,6 +36,12 @@ namespace LightControlServer
                             .AllowAnyMethod();
                     });
             });
+
+            #region Seed Data
+            services.AddDbContext<LightControlModel>(options =>
+                options.UseInMemoryDatabase("LightsDb"));
+
+            #endregion Seed Data
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,7 +52,14 @@ namespace LightControlServer
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            using (var scope =
+                app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (var ctx = scope.ServiceProvider.GetService<LightControlModel>())
+            {
+                AddSeedData(ctx);
+            }
+
+                app.UseHttpsRedirection();
 
             app.UseRouting();
             app.UseCors(DevFrontendAllowCors);
@@ -53,6 +69,28 @@ namespace LightControlServer
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static void AddSeedData(LightControlModel ctx)
+        {
+            var strand1 = new Strand
+            {
+                Id = 1,
+                Lights = new List<Light>
+                { 
+                    new Light { Id = 1, Color = "#FF0000" },
+                    new Light { Id = 2, Color = "#00FF00"},
+                    new Light { Id = 3, Color = "#0000FF"},
+                    new Light { Id = 4, Color = "#FF0000"},
+                    new Light { Id = 5, Color = "#00FF00"},
+                    new Light { Id = 6, Color = "#0000FF"},
+                    new Light { Id = 7, Color = "#FF0000"},
+                    new Light { Id = 8, Color = "#00FF00"},
+                    new Light { Id = 9, Color = "#0000FF"},
+                }
+            };
+            ctx.Strands.Add(strand1);
+            ctx.SaveChanges();
         }
     }
 }

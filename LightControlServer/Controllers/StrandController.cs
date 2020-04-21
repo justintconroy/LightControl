@@ -2,72 +2,41 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LightControlServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StrandController : ControllerBase
+    public class StrandsController : ControllerBase
     {
-        private readonly ILogger _logger;
-        public StrandController(ILogger<StrandController> logger)
+        private readonly LightControlModel _ctx;
+        public StrandsController(
+            LightControlModel ctx)
         {
-            _logger = logger;
+            _ctx = ctx;
         }
 
         // GET: api/Strand
         [HttpGet]
         public IActionResult Get()
         {
-            //_logger.LogInformation("A thing to log!!!!!");
-            var strand = new Strand
-            {
-                Id = 1,
-                Lights = new List<Light>
-                {
-                    new Light { Id = 1, Color = "#FF0000"},
-                    new Light { Id = 2, Color = "#00FF00"},
-                    new Light { Id = 3, Color = "#0000FF"},
-                    new Light { Id = 4, Color = "#FF0000"},
-                    new Light { Id = 5, Color = "#00FF00"},
-                    new Light { Id = 6, Color = "#0000FF"},
-                    new Light { Id = 7, Color = "#FF0000"},
-                    new Light { Id = 8, Color = "#00FF00"},
-                    new Light { Id = 9, Color = "#0000FF"},
-                }
-            };
-
-            return Ok(strand);
+            return Ok(_ctx.Strands);
         }
 
         // GET: api/Strand/5
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id)
         {
-            var strand = new Strand
-            {
-                Id = 1,
-                Lights = new List<Light>
-                {
-                    new Light { Id = 1, Color = "#FF0000"},
-                    new Light { Id = 2, Color = "#00FF00"},
-                    new Light { Id = 3, Color = "#0000FF"},
-                    new Light { Id = 4, Color = "#FF0000"},
-                    new Light { Id = 5, Color = "#00FF00"},
-                    new Light { Id = 6, Color = "#0000FF"},
-                    new Light { Id = 7, Color = "#FF0000"},
-                    new Light { Id = 8, Color = "#00FF00"},
-                    new Light { Id = 9, Color = "#0000FF"},
-                }
-            };
-
-            return Ok(strand);
+            return Ok(_ctx.Strands
+                .FirstOrDefault(s => s.Id == id));
         }
 
         // POST: api/Strand
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] Strand value)
         {
+
         }
 
         // PUT: api/Strand/5
