@@ -1,15 +1,17 @@
+using LightControlServer.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 
-namespace LightControl
+namespace LightControlServer
 {
     public class Startup
     {
+        readonly string DevFrontendAllowCors = "_devFrontendAllowCors";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -20,14 +22,26 @@ namespace LightControl
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+            services.AddLogging();
 
-            services.AddControllersWithViews();
-
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
+            services.AddCors(options =>
             {
-                configuration.RootPath = "ClientApp/build";
+                options.AddPolicy(name: DevFrontendAllowCors,
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:3000")
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
             });
+
+            #region Seed Data
+            services.AddDbContext<LightControlModel>(options =>
+                options.UseInMemoryDatabase("LightsDb"));
+
+            #endregion Seed Data
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,35 +51,49 @@ namespace LightControl
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
+
+            using (var scope =
+                app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            using (var ctx = scope.ServiceProvider.GetService<LightControlModel>())
             {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                AddSeedData(ctx);
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles();
+                app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors(DevFrontendAllowCors);
 
+            app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
+                endpoints.MapControllers();
             });
+        }
 
-            app.UseSpa(spa =>
+        private static void AddSeedData(LightControlModel ctx)
+        {
+            var lights = new List<Light>
             {
-                spa.Options.SourcePath = "ClientApp";
+                new Light { Id = 1, Color = "#FF0000" },
+                new Light { Id = 2, Color = "#00FF00"},
+                new Light { Id = 3, Color = "#0000FF"},
+                new Light { Id = 4, Color = "#FF0000"},
+                new Light { Id = 5, Color = "#00FF00"},
+                new Light { Id = 6, Color = "#0000FF"},
+                new Light { Id = 7, Color = "#FF0000"},
+                new Light { Id = 8, Color = "#00FF00"},
+                new Light { Id = 9, Color = "#0000FF"},
+            };
+            ctx.Lights.AddRange(lights);
 
-                if (env.IsDevelopment())
-                {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
-            });
+            var strand1 = new Strand
+            {
+                Id = 1,
+                Lights = lights
+            };
+            ctx.Strands.Add(strand1);
+            ctx.SaveChanges();
         }
     }
 }

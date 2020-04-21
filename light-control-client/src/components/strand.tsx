@@ -6,15 +6,34 @@ interface IStrandProps {}
 interface IStrandState {
   lights: Color[];
   selected: number | null;
+  isLoaded: boolean;
 }
 
 export class Strand extends React.Component<IStrandProps, IStrandState> {
   constructor(props: IStrandProps) {
     super(props);
     this.state = {
-      lights: Array(50).fill({ Color: "#000000", isSelected: false }),
+      lights: Array(0),
       selected: null,
+      isLoaded: false,
     };
+  }
+
+  componentDidMount() {
+    fetch("https://localhost:5001/api/strands/1")
+      .then((response) => response.json())
+      .then(
+        (data) => {
+          const lights: string[] = data.lights.map(
+            (light: any) => light.color as string
+          );
+          this.setState({ lights: lights, isLoaded: true });
+        },
+        (_error) =>
+          this.setState({
+            lights: Array(0),
+          })
+      );
   }
 
   handleClick = (i: number) => {
@@ -36,8 +55,18 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
     this.setState({ lights: lights });
   };
 
+  handleChangeComplete = (i: number, color: ColorResult) => {
+    const opts = {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ color: color.hex }),
+    };
+
+    fetch(`https://localhost:5001/api/lights/${i + 1}`, opts);
+  };
+
   render() {
-    return (
+    return this.state.isLoaded ? (
       <div className="strand">
         {this.state.lights.map((light, i) => {
           return (
@@ -46,10 +75,15 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
               isSelected={i === this.state.selected}
               onClick={() => this.handleClick(i)}
               onChange={(color: ColorResult) => this.handleChange(i, color)}
+              onChangeComplete={(color: ColorResult) =>
+                this.handleChangeComplete(i, color)
+              }
             />
           );
         })}
       </div>
+    ) : (
+      <div className="strand">Strand not loaded!</div>
     );
   }
 }

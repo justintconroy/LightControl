@@ -6,6 +6,7 @@ interface ILightProps {
   isSelected: boolean;
   onClick: () => void;
   onChange: (color: ColorResult) => void;
+  onChangeComplete: (color: ColorResult) => void;
 }
 
 export class Light extends React.Component<ILightProps> {
@@ -29,6 +30,7 @@ export class Light extends React.Component<ILightProps> {
               color={this.props.color}
               disableAlpha={true}
               onChange={this.props.onChange}
+              onChangeComplete={this.props.onChangeComplete}
             />
           </span>
         )}

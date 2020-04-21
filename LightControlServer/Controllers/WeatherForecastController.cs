@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace LightControl.Controllers
+namespace LightControlServer.Controllers
 {
     [ApiController]
     [Route("[controller]")]

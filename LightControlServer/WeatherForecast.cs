@@ -1,6 +1,6 @@
 using System;
 
-namespace LightControl
+namespace LightControlServer
 {
     public class WeatherForecast
     {
