@@ -55,6 +55,16 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
     this.setState({ lights: lights });
   };
 
+  handleChangeComplete = (i: number, color: ColorResult) => {
+    const opts = {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ color: color.hex }),
+    };
+
+    fetch(`https://localhost:5001/api/lights/${i + 1}`, opts);
+  };
+
   render() {
     return this.state.isLoaded ? (
       <div className="strand">
@@ -65,6 +75,9 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
               isSelected={i === this.state.selected}
               onClick={() => this.handleClick(i)}
               onChange={(color: ColorResult) => this.handleChange(i, color)}
+              onChangeComplete={(color: ColorResult) =>
+                this.handleChangeComplete(i, color)
+              }
             />
           );
         })}
