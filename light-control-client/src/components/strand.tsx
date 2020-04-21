@@ -20,7 +20,7 @@ export class Strand extends React.Component<IStrandProps, IStrandState> {
   }
 
   componentDidMount() {
-    fetch("https://localhost:5001/api/strand")
+    fetch("https://localhost:5001/api/strands/1")
       .then((response) => response.json())
       .then(
         (data) => {

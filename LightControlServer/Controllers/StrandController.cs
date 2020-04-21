@@ -1,5 +1,6 @@
 ﻿using LightControlServer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,11 @@ namespace LightControlServer.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(_ctx.Strands);
+            var strands = _ctx.Strands
+                .Include(s => s.Lights)
+                .ToList();
+
+            return Ok(strands);
         }
 
         // GET: api/Strand/5
@@ -29,6 +34,7 @@ namespace LightControlServer.Controllers
         public IActionResult Get(int id)
         {
             return Ok(_ctx.Strands
+                .Include(s => s.Lights)
                 .FirstOrDefault(s => s.Id == id));
         }
 

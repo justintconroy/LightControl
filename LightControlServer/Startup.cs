@@ -73,21 +73,24 @@ namespace LightControlServer
 
         private static void AddSeedData(LightControlModel ctx)
         {
+            var lights = new List<Light>
+            {
+                new Light { Id = 1, Color = "#FF0000" },
+                new Light { Id = 2, Color = "#00FF00"},
+                new Light { Id = 3, Color = "#0000FF"},
+                new Light { Id = 4, Color = "#FF0000"},
+                new Light { Id = 5, Color = "#00FF00"},
+                new Light { Id = 6, Color = "#0000FF"},
+                new Light { Id = 7, Color = "#FF0000"},
+                new Light { Id = 8, Color = "#00FF00"},
+                new Light { Id = 9, Color = "#0000FF"},
+            };
+            ctx.Lights.AddRange(lights);
+
             var strand1 = new Strand
             {
                 Id = 1,
-                Lights = new List<Light>
-                { 
-                    new Light { Id = 1, Color = "#FF0000" },
-                    new Light { Id = 2, Color = "#00FF00"},
-                    new Light { Id = 3, Color = "#0000FF"},
-                    new Light { Id = 4, Color = "#FF0000"},
-                    new Light { Id = 5, Color = "#00FF00"},
-                    new Light { Id = 6, Color = "#0000FF"},
-                    new Light { Id = 7, Color = "#FF0000"},
-                    new Light { Id = 8, Color = "#00FF00"},
-                    new Light { Id = 9, Color = "#0000FF"},
-                }
+                Lights = lights
             };
             ctx.Strands.Add(strand1);
             ctx.SaveChanges();
