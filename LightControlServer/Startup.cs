@@ -5,7 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MQTTnet;
+using MQTTnet.Client.Options;
+using MQTTnet.Extensions.ManagedClient;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace LightControlServer
 {
@@ -19,7 +24,6 @@ namespace LightControlServer
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -37,11 +41,41 @@ namespace LightControlServer
                     });
             });
 
-            #region Seed Data
             services.AddDbContext<LightControlModel>(options =>
                 options.UseInMemoryDatabase("LightsDb"));
 
-            #endregion Seed Data
+            #region MQTT
+            services.AddSingleton(serviceProvider =>
+            {
+                var options = new ManagedMqttClientOptionsBuilder()
+                    .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+                    .WithClientOptions(new MqttClientOptionsBuilder()
+                        .WithClientId("Client1")
+                        .WithTcpServer("localhost")
+                        .Build())
+                    .Build();
+
+                var client = new MqttFactory().CreateManagedMqttClient();
+                client.SubscribeAsync(new TopicFilterBuilder()
+                    .WithTopic("hi/world").Build()).GetAwaiter().GetResult();
+
+                client.UseApplicationMessageReceivedHandler(e =>
+                {
+                    Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
+                    Console.WriteLine($"+ Topic = {e.ApplicationMessage.Topic}");
+                    Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                    Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
+                    Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
+                    Console.WriteLine();
+
+                    client.PublishAsync("hello/world", "hi").GetAwaiter().GetResult();
+                });
+
+                client.StartAsync(options).GetAwaiter().GetResult();
+
+                return client;
+            });
+            #endregion MQTT
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,6 +103,8 @@ namespace LightControlServer
             {
                 endpoints.MapControllers();
             });
+
+            app.ApplicationServices.GetService<IManagedMqttClient>();
         }
 
         private static void AddSeedData(LightControlModel ctx)
