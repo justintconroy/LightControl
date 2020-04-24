@@ -26,6 +26,13 @@ namespace LightControlServer.Controllers
                 .Include(s => s.Lights)
                 .ToList();
 
+            var dtos = new List<StrandDto>();
+            foreach (var strand in strands)
+            {
+                dtos.Add(new StrandDto(strand));
+            }
+
+
             return Ok(strands);
         }
 
@@ -33,9 +40,9 @@ namespace LightControlServer.Controllers
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id)
         {
-            return Ok(_ctx.Strands
+            return Ok(new StrandDto(_ctx.Strands
                 .Include(s => s.Lights)
-                .FirstOrDefault(s => s.Id == id));
+                .FirstOrDefault(s => s.Id == id)));
         }
 
         // POST: api/Strand

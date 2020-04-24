@@ -1,8 +1,11 @@
 ﻿using LightControlServer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace LightControlServer.Controllers
 {
@@ -23,17 +26,22 @@ namespace LightControlServer.Controllers
 
         // PUT: api/Lights/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Light light)
+        public async Task<IActionResult> Put(int id, [FromBody] LightDto light)
         {
-            var dbLight = _ctx.Lights.Find(id);
+            var dbLight = _ctx.Lights
+                .Include(l => l.Strand.Lights)
+                .FirstOrDefault(l => l.Id == id);
+
             if (light == null) { return NotFound(); }
 
             dbLight.Color = light.Color;
             _ctx.SaveChanges();
 
-            await _mqtt.PublishAsync("hello/world", "hi!");
+            var strandDto = new StrandDto(dbLight.Strand);
+            var json = JsonSerializer.Serialize(strandDto);
+            await _mqtt.PublishAsync($"strand/{dbLight.Strand.Id}", json);
 
-            return Ok(light);
+            return Ok(new LightDto(dbLight));
         }
     }
 }
