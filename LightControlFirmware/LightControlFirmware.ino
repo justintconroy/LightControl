@@ -1,31 +1,20 @@
+#include "config.h"
 #include <WiFi.h>
-#include <PubSubClient.h>
-
-const char *WIFI_SSID = "<WiFi SSID>";
-const char *WIFI_PW = "<WiFi PW>";
-
-IPAddress server(127, 0 ,0 ,1);
-#define MQTT_PORT 1883
-
-#define NUM_LEDS 50
-#define LED_TYPE WS2801
-#define COLOR_ORDER RGB
-#define DATA_PIN 23
-#define CLK_PIN 18
-#define VOLTS 5
-#define MAX_MA 4000
+#include <MQTT.h>
 
 WiFiClient wifiClient;
-PubSubClient client(wifiClient);
+MQTTClient client(1024);
+
+unsigned long lastMillis = 0;
 
 void connectToWifi()
 {
   Serial.println("Connecting to WiFi...");
   Serial.print("SSID: ");
-  Serial.println(WIFI_SSID);
+  Serial.println(WifiSsid);
   Serial.print("PW:   ");
-  Serial.println(WIFI_PW);
-  WiFi.begin(WIFI_SSID, WIFI_PW);
+  Serial.println(WifiPw);
+  WiFi.begin(WifiSsid, WifiPw);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
@@ -45,35 +34,39 @@ void connectToMqtt()
   Serial.print(":");
   Serial.println(MQTT_PORT);
 
-  while (!client.connected())
-  {
-    Serial.println("Attempting connection...");
-    if (client.connect("arduinoClient"))
-    {
-      Serial.println("connected");
-      client.publish("outTopic", "hello world");
-      client.subscribe("inTopic");
-    }
-    else
-    {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
-      delay(5000);
-    }
-  }
+  client.begin(server, wifiClient);
+  client.onMessage(handleMqttMessage);
+  reconnect();
 }
 
-void handleMqttMessage(char *topic, byte *payload, unsigned int length)
+void reconnect()
+{
+  Serial.print("checking wifi...");
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.print("\nconnecting...");
+  while (!client.connect("arduino", "try", "try"))
+  {
+    Serial.print(".");
+    delay(1000);
+  }
+
+  Serial.println("\nconnected!");
+
+  client.subscribe("strand/1");
+  // client.unsubscribe("/hello");
+}
+
+void handleMqttMessage(String &topic, String &payload)
 {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  for (int i = 0; i < length; i++)
-  {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
+  Serial.println(payload);
 }
 
 void setup()
@@ -82,9 +75,6 @@ void setup()
   Serial.println();
   Serial.println();
 
-  client.setServer(server, MQTT_PORT);
-  client.setCallback(handleMqttMessage);
-
   connectToWifi();
   connectToMqtt();
   delay(1500);
@@ -92,9 +82,15 @@ void setup()
 
 void loop()
 {
+  client.loop();
   if (!client.connected())
   {
-    connectToMqtt();
+    reconnect();
   }
-  client.loop();
+  // publish a message roughly every second.
+  if (millis() - lastMillis > 1000)
+  {
+    lastMillis = millis();
+    client.publish("strand/1/out", "worldxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+  }
 }
